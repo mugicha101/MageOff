@@ -1,5 +1,7 @@
 package game.mageoff;
 
+import game.mageoff.combat.Attack;
+import game.mageoff.combat.Lane;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -8,17 +10,22 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.Shape;
 import javafx.scene.transform.Scale;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
 
 public class Game extends Application {
+    private static final int fps = 60;
     private static Game activeGame;
-    public static final double width = 960;
-    public static final double height = 540;
+    public static final double width = 400;
+    public static final double height = 500;
     public static final double border = 5;
     public static final Color marginColor = Color.color(0, 0.5, 0.5);
     public static final Color borderColor = Color.color(0.5, 1, 1);
@@ -83,8 +90,8 @@ public class Game extends Application {
         stage.setTitle("Mage Off");
         stage.setResizable(true);
         stage.show();
-        stage.setWidth(width);
-        stage.setHeight(height);
+        stage.setWidth(Screen.getPrimary().getBounds().getWidth() * 0.75);
+        stage.setHeight(Screen.getPrimary().getBounds().getHeight() * 0.75);
         resizeScreen();
         stage.widthProperty().addListener((obs, oldVal, newVal) -> resizeScreen());
         stage.heightProperty().addListener((obs, oldVal, newVal) -> resizeScreen());
@@ -92,13 +99,14 @@ public class Game extends Application {
         Input.init(stage);
         zoomMulti = 1;
         tickCount = -1;
-        Timeline tl = new Timeline(new KeyFrame(Duration.millis(17), e -> tick()));
+        double frameDelay = 1000.0/fps;
+        Timeline tl = new Timeline(new KeyFrame(Duration.millis(frameDelay), e -> tick(frameDelay/1000.0)));
         tl.setCycleCount(Timeline.INDEFINITE);
         tl.play();
     }
 
     private void setupGame() {
-
+        display.getChildren().addAll(Lane.laneGroup, Attack.attackGroup);
     }
 
     public double getScreenWidth() {
@@ -135,10 +143,16 @@ public class Game extends Application {
         display.setScaleY(scaleVal);
     }
 
-    private void tick() {
+    private void tick(double dt) {
         tickCount++;
         Input.keyTick();
         resizeScreen();
+        Lane.tickLanes(dt);
+        if (tickCount % 15 == 0) {
+            Shape s = new Rectangle(0, 0, 10, 10); // new Circle(0, 0, 10);
+            s.setFill(Color.BLUE);
+            Lane.lanes[(int)(Math.random() * 5)].addPlayerAttack(new Attack(s, 10, 1));
+        }
     }
 
     public static void main(String[] args) {
