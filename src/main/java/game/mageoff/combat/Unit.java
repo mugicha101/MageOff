@@ -1,12 +1,17 @@
 package game.mageoff.combat;
 
+import game.mageoff.deck.CardHandler;
+
 // represents a participant in combat (occupies lane sides)
 public class Unit {
+    protected final CardHandler cardHandler;
     private int maxHealth;
     private int health;
-    public Unit(int health) {
+    public Unit(CardHandler cardHandler, int health) {
+        this.cardHandler = cardHandler;
         maxHealth = health;
         this.health = health;
+        cardHandler.setupBattle();
     }
 
     // handle damage to self and return remaining block
@@ -20,5 +25,9 @@ public class Unit {
                 health = 0;
         }
         return block;
+    }
+
+    public void tick(double dt) {
+        cardHandler.tick(dt);
     }
 }

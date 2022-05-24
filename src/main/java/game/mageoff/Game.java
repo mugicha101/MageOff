@@ -2,12 +2,18 @@ package game.mageoff;
 
 import game.mageoff.combat.Attack;
 import game.mageoff.combat.Lane;
+import game.mageoff.combat.Unit;
+import game.mageoff.deck.Card;
+import game.mageoff.deck.CardFactory;
+import game.mageoff.deck.CardHandler;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
@@ -44,8 +50,11 @@ public class Game extends Application {
     private Rectangle paddingTop;
     private Rectangle paddingBottom;
     private int tickCount;
-
     private double zoomMulti;
+    public double mouseX = 0;
+    public double mouseY = 0;
+
+    private Unit player;
 
     public int getTick() {
         return tickCount;
@@ -103,10 +112,27 @@ public class Game extends Application {
         Timeline tl = new Timeline(new KeyFrame(Duration.millis(frameDelay), e -> tick(frameDelay/1000.0)));
         tl.setCycleCount(Timeline.INDEFINITE);
         tl.play();
+
+        display.setOnMouseMoved(new EventHandler<MouseEvent>() {
+            @Override public void handle(MouseEvent event) {
+                mouseX = event.getX();
+                mouseY = event.getY();
+            }
+        });
+        display.setOnMouseDragged(new EventHandler<MouseEvent>() {
+            @Override public void handle(MouseEvent event) {
+                mouseX = event.getX();
+                mouseY = event.getY();
+            }
+        });
     }
 
     private void setupGame() {
-        display.getChildren().addAll(Lane.laneGroup, Attack.attackGroup);
+        display.getChildren().addAll(Lane.laneGroup, Attack.attackGroup, Card.cardGroup);
+        CardHandler cardHandler = new CardHandler();
+        for (int i = 0; i < 10; i++)
+            cardHandler.addCard(CardFactory.testAttackCard());
+        player = new Unit(cardHandler, 100);
     }
 
     public double getScreenWidth() {
@@ -147,12 +173,15 @@ public class Game extends Application {
         tickCount++;
         Input.keyTick();
         resizeScreen();
-        Lane.tickLanes(dt);
+
         if (tickCount % 15 == 0) {
             Shape s = new Rectangle(0, 0, 10, 10); // new Circle(0, 0, 10);
             s.setFill(Color.BLUE);
-            Lane.lanes[(int)(Math.random() * 5)].addPlayerAttack(new Attack(s, 10, 1));
+            Lane.lanes[(int)(Math.random() * 5)].addOpposingAttack(new Attack(s, 10, 1));
         }
+
+        player.tick(dt);
+        Lane.tickLanes(dt);
     }
 
     public static void main(String[] args) {

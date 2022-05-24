@@ -53,8 +53,9 @@ public class Attack {
         display.setScaleY(scale);
         Bounds bounds = display.getBoundsInParent();
         display.setTranslateX(x - (bounds.getCenterX() - display.getTranslateX()));
-        endY -= bounds.getMinY() - display.getTranslateY();
-        startY -= bounds.getMaxY() - display.getTranslateY();
+        double dY = (endY < startY)? bounds.getMinY() - display.getTranslateY() : bounds.getMaxY() - display.getTranslateY();
+        endY -= dY;
+        startY -= dY;
         display.setTranslateY(startY + (endY - startY) * age/time);
     }
 

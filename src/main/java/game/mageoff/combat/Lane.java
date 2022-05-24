@@ -26,8 +26,8 @@ public class Lane {
             lane.tick(dt);
     }
 
-    private static double getX(int index) {
-        return Game.width * 0.5 + (index - 2) * Game.width * 0.13;
+    public static double getX(int index) {
+        return Game.width * 0.5 + (index - 2) * Game.width * 0.15;
     }
 
     private static double getArc(int index) {
